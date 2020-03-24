@@ -1,5 +1,5 @@
 ## Loading data into memcache using multiple processes
-Запуск из папки ./app
+Run from ./app
 
 python memc_load_process_queue.py
 
