@@ -1,13 +1,12 @@
 ## Loading data into memcache using multiple processes
 Запуск из папки ./app
 
-python mem_cache.py
+python memc_load_process_queue.py
 
-Аргументы командной строки
-usage: log_analyzer.py [-h] [-c CONFIG]
 
 optional arguments:
 
--h, --help show this help message and exit
-
--c CONFIG, --config CONFIG config file
+--test - run in test mode
+--pattern "path/to/log"- pattern parsed files (/home/logs/*.tsv.gz)
+--idfa, --gaid, --adid, --dvid "host:port" memcache server address 
+--read_p, --parse_p, --pack_p, --load_p n - number processes for readind, parsing, packind, loading tasks
