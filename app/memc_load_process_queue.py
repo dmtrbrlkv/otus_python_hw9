@@ -312,7 +312,7 @@ if __name__ == '__main__':
     try:
         t = time.time()
         main(opts)
-        logging.info(f"Run time {time.time() - t}")
+        logging.info(f"Run time {time.time() - t:.2f} seconds")
 
     except Exception as e:
         logging.exception("Unexpected error: %s" % e)
