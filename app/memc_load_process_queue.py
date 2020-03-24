@@ -285,7 +285,7 @@ def value_in_memcache_test(opts):
 
 if __name__ == '__main__':
     op = OptionParser()
-    op.add_option("-t", "--test", action="store_true", default=True)
+    op.add_option("-t", "--test", action="store_true", default=False)
     op.add_option("-l", "--log", action="store", default=None)
     op.add_option("--dry", action="store_true", default=False)
     op.add_option("--pattern", action="store", default="/home/dmitry/Загрузки/logs/20170929000000.tsv.gz")
