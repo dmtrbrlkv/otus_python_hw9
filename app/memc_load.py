@@ -13,6 +13,12 @@ from optparse import OptionParser
 import appsinstalled_pb2
 # pip install python-memcached
 import memcache
+from functools import wraps, lru_cache
+import time
+
+@lru_cache()
+def get_memcache(memc_addr):
+    return memcache.Client([memc_addr])
 
 NORMAL_ERR_RATE = 0.01
 AppsInstalled = collections.namedtuple("AppsInstalled", ["dev_type", "dev_id", "lat", "lon", "apps"])
@@ -37,7 +43,7 @@ def insert_appsinstalled(memc_addr, appsinstalled, dry_run=False):
         if dry_run:
             logging.debug("%s - %s -> %s" % (memc_addr, key, str(ua).replace("\n", " ")))
         else:
-            memc = memcache.Client([memc_addr])
+            memc = get_memcache(memc_addr)
             memc.set(key, packed)
     except Exception as e:
         logging.exception("Cannot write to memc %s: %s" % (memc_addr, e))
@@ -75,12 +81,19 @@ def main(options):
         processed = errors = 0
         logging.info('Processing %s' % fn)
         fd = gzip.open(fn)
+        i = 0
         for line in fd:
+            i+=1
+            if i % 100000 == 0:
+                logging.info(f"Read {i} from {fn}")
+            # if i % 500000 == 0:
+            #      break
             line = line.strip()
             line = line.decode("utf8")
             if not line:
                 continue
             appsinstalled = parse_appsinstalled(line)
+
             if not appsinstalled:
                 errors += 1
                 continue
@@ -89,11 +102,14 @@ def main(options):
                 errors += 1
                 logging.error("Unknow device type: %s" % appsinstalled.dev_type)
                 continue
+
+
             ok = insert_appsinstalled(memc_addr, appsinstalled, options.dry)
             if ok:
                 processed += 1
             else:
                 errors += 1
+
         if not processed:
             fd.close()
             dot_rename(fn)
@@ -105,7 +121,7 @@ def main(options):
         else:
             logging.error("High error rate (%s > %s). Failed load" % (err_rate, NORMAL_ERR_RATE))
         fd.close()
-        dot_rename(fn)
+        # dot_rename(fn)
 
 
 def prototest():
@@ -129,7 +145,7 @@ if __name__ == '__main__':
     op.add_option("-t", "--test", action="store_true", default=False)
     op.add_option("-l", "--log", action="store", default=None)
     op.add_option("--dry", action="store_true", default=False)
-    op.add_option("--pattern", action="store", default="/home/dmitry/Загрузки/*.tsv.gz")
+    op.add_option("--pattern", action="store", default="/home/dmitry/Загрузки/logs/20170929000000.tsv.gz")
     op.add_option("--idfa", action="store", default="127.0.0.1:33013")
     op.add_option("--gaid", action="store", default="127.0.0.1:33014")
     op.add_option("--adid", action="store", default="127.0.0.1:33015")
@@ -143,7 +159,10 @@ if __name__ == '__main__':
 
     logging.info("Memc loader started with options: %s" % opts)
     try:
+        t = time.time()
         main(opts)
+        print(time.time() - t)
+
     except Exception as e:
         logging.exception("Unexpected error: %s" % e)
         sys.exit(1)
