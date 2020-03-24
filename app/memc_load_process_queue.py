@@ -18,6 +18,7 @@ import time
 
 from multiprocessing import Queue, Process, Value
 
+# default for Xeon X3470, 4 cores, 8 threads
 READ_PROCESSES = 1
 PARSE_PROCESSES = 8
 PACK_PROCESSES = 5
@@ -167,6 +168,7 @@ def main(options):
         "dvid": options.dvid,
     }
     for fn in glob.iglob(options.pattern):
+        logging.info(f"Start process file {fn}")
 
         processed = Value("d", 0)
         errors = Value("d", 0)
@@ -227,7 +229,7 @@ def main(options):
             dot_rename(fn)
             continue
 
-        logging.info(f"Processed {processed.value}, errors {errors.value}")
+        logging.info(f"End process file {fn}. Processed {processed.value}, errors {errors.value}")
 
         err_rate = float(errors.value) / processed.value
         if err_rate < NORMAL_ERR_RATE:
