@@ -19,7 +19,7 @@ import time
 
 from multiprocessing import Queue, Process, Value
 
-MAX_LINES = 500000
+MAX_LINES = None
 LOG_EVERY = 100000
 
 SENTINEL = "###QUIT###"
