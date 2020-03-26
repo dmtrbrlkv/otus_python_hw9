@@ -12,5 +12,4 @@ optional arguments:
 
 --idfa, --gaid, --adid, --dvid "host:port" memcache server address 
 
---read_p, --parse_p, --pack_p, --load_p n - number processes for readind, parsing, packind, loading tasks
-
+--use_threads - use threads instead processes for loadind to memcache
